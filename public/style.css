@@ -1,0 +1,297 @@
+/* style.css */
+
+/* --- Reset Básico e Estilos Globais --- */
+body {
+    font-family: 'Arial', sans-serif; /* Fonte padrão */
+    display: flex; /* Para centralizar o conteúdo principal */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh; /* Ocupa a altura total da viewport */
+    margin: 0; /* Remove margens padrão do body */
+    background-color: #f0f2f5; /* Cor de fundo suave */
+    color: #333; /* Cor de texto padrão */
+    padding: 20px; /* Espaçamento interno em volta de tudo */
+    box-sizing: border-box; /* Inclui padding e borda no tamanho do elemento */
+    -webkit-font-smoothing: antialiased; /* Suaviza a renderização da fonte em WebKit */
+    -moz-osx-font-smoothing: grayscale; /* Suaviza a renderização da fonte em Firefox/OSX */
+}
+
+/* --- Container Principal do Jogo --- */
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px; /* Largura máxima para telas maiores */
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra suave para efeito de profundidade */
+    padding: 30px;
+    box-sizing: border-box;
+    min-height: 500px; /* Altura mínima para as telas */
+    justify-content: space-between; /* Espaçamento entre os elementos internos */
+}
+
+/* --- Estilos Comuns para as Telas (Início, Jogo, Resultado) --- */
+.screen {
+    width: 100%;
+    text-align: center;
+    display: none; /* Escondido por padrão, JavaScript mostrará o ativo */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1; /* Permite que a tela ocupe o espaço disponível */
+    padding: 0 10px; /* Pequeno padding para telas menores */
+}
+
+.screen.active {
+    display: flex; /* A tela com a classe 'active' será exibida */
+}
+
+/* --- Estilos da Tela de Início --- */
+#start-screen h1 {
+    color: #4CAF50; /* Verde vibrante */
+    margin-bottom: 15px;
+    font-size: 2.2em; /* Tamanho do título */
+}
+
+#start-screen p {
+    font-size: 1.1em;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+#player-name-input {
+    width: 80%;
+    max-width: 280px;
+    padding: 12px 15px;
+    margin-bottom: 25px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1.1em;
+    text-align: center;
+    transition: border-color 0.3s ease;
+}
+
+#player-name-input:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+#start-button, #restart-button {
+    padding: 15px 35px;
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.3em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+#start-button:hover, #restart-button:hover {
+    background-color: #45a049; /* Verde mais escuro no hover */
+}
+
+#start-button:active, #restart-button:active {
+    transform: translateY(2px); /* Efeito de clique */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#lobby-info {
+    margin-top: 30px;
+    font-size: 0.95em;
+    color: #666;
+}
+
+#players-in-lobby {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+    max-height: 100px;
+    overflow-y: auto; /* Para scroll se muitos jogadores */
+    width: 100%;
+}
+
+#players-in-lobby li {
+    background-color: #e9e9e9;
+    margin-bottom: 5px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+
+/* --- Estilos da Tela do Jogo --- */
+#game-info {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    font-size: 1.3em;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 0;
+    background-color: #eef;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#timer, #score {
+    flex: 1;
+    padding: 5px;
+}
+
+#challenge-text {
+    font-size: 4.5em; /* Tamanho grande para o texto do desafio */
+    font-weight: bold;
+    margin-bottom: 50px; /* Espaço antes dos botões */
+    min-height: 1.5em; /* Garante que o container tenha altura mesmo sem texto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 10px; /* Pequeno padding para evitar cortar texto */
+    word-break: break-word; /* Quebra palavras longas */
+}
+
+/* Ajuste de tamanho para fontes muito pequenas */
+#challenge-text span[style*="font-size: 0.8em"] {
+    font-size: 0.8em !important; /* Sobrescreve o tamanho base para a fase específica */
+}
+
+
+#controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Duas colunas */
+    gap: 20px; /* Espaçamento entre os botões */
+    width: 100%;
+    max-width: 400px; /* Largura máxima para os botões */
+    margin-top: auto; /* Empurra os botões para baixo */
+}
+
+.color-button {
+    width: 100%; /* Ocupa a largura da coluna */
+    padding: 40px 0; /* Altura do botão */
+    font-size: 1.8em;
+    font-weight: bold;
+    color: white; /* Texto branco nos botões de cor */
+    border: none;
+    border-radius: 12px; /* Cantos mais arredondados */
+    cursor: pointer;
+    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Sombra para os botões */
+}
+
+.color-button:active {
+    transform: translateY(3px); /* Efeito de clique */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Cores específicas para cada botão */
+#btn-blue { background-color: #007bff; } /* Azul Bootstrap */
+#btn-green { background-color: #28a745; } /* Verde Bootstrap */
+#btn-red { background-color: #dc3545; } /* Vermelho Bootstrap */
+#btn-yellow { background-color: #ffc107; color: #333; } /* Amarelo Bootstrap, texto escuro */
+
+/* --- Estilos da Tela de Resultados --- */
+#results-screen h2 {
+    color: #007bff;
+    margin-bottom: 20px;
+    font-size: 2em;
+}
+
+#final-score {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #4CAF50;
+    margin-bottom: 30px;
+}
+
+#results-screen h3 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #555;
+}
+
+#ranking-list {
+    list-style: none; /* Remove marcadores de lista */
+    padding: 0;
+    width: 90%;
+    max-width: 300px;
+    margin-bottom: 40px;
+}
+
+#ranking-list li {
+    background-color: #e9e9e9;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#ranking-list li:first-child {
+    font-weight: bold;
+    color: #4CAF50;
+    background-color: #d4edda; /* Fundo mais claro para o primeiro lugar */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* --- Media Queries para Responsividade --- */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    #game-container {
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: none; /* Remove sombra em telas muito pequenas para mais espaço */
+    }
+
+    #start-screen h1 {
+        font-size: 1.8em;
+    }
+
+    #start-button, #restart-button {
+        padding: 12px 25px;
+        font-size: 1.1em;
+    }
+
+    #challenge-text {
+        font-size: 3.5em; /* Reduz tamanho do texto do desafio */
+        margin-bottom: 30px;
+    }
+
+    #controls {
+        gap: 10px; /* Reduz espaçamento entre botões */
+    }
+
+    .color-button {
+        padding: 30px 0; /* Reduz altura dos botões */
+        font-size: 1.5em;
+    }
+
+    #game-info {
+        font-size: 1em;
+        margin-bottom: 20px;
+    }
+
+    #results-screen h2 {
+        font-size: 1.8em;
+    }
+
+    #final-score {
+        font-size: 1.3em;
+    }
+
+    #ranking-list li {
+        font-size: 1em;
+        padding: 10px;
+    }
+}
