@@ -3,160 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste Stroop Mobile</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            color: #333;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        #game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 600px;
-            flex-grow: 1;
-            justify-content: center;
-        }
-
-        #start-screen, #game-screen, #results-screen {
-            display: none; /* Serão controladas por JavaScript */
-            width: 100%;
-            text-align: center;
-        }
-
-        #start-screen.active, #game-screen.active, #results-screen.active {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%; /* Ocupa o espaço disponível */
-        }
-
-        #start-screen input {
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 300px;
-            text-align: center;
-        }
-
-        #start-button {
-            padding: 15px 30px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        #start-button:hover {
-            background-color: #45a049;
-        }
-
-        #challenge-text {
-            font-size: 4em;
-            font-weight: bold;
-            margin-bottom: 40px;
-            min-height: 1.5em; /* Garante que o texto não "pule" */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 10px;
-        }
-
-        #controls {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .color-button {
-            width: 100%;
-            padding: 30px 0;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .color-button:active {
-            transform: translateY(2px);
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-        }
-
-        #btn-blue { background-color: blue; }
-        #btn-green { background-color: green; }
-        #btn-red { background-color: red; }
-        #btn-yellow { background-color: gold; }
-
-        #game-info {
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        #timer, #score {
-            padding: 10px;
-            background-color: #eee;
-            border-radius: 5px;
-            min-width: 100px;
-        }
-
-        #final-score, #ranking-list {
-            margin-top: 20px;
-            font-size: 1.5em;
-        }
-        #ranking-list li {
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
-        #ranking-list li:first-child {
-            font-weight: bold;
-            color: #4CAF50;
-        }
-    </style>
-</head>
+    <title>Teste do Efeito Stroop Mobile</title>
+    </head>
 <body>
+
     <div id="game-container">
-        <div id="start-screen" class="active">
-            <h1>Teste do Efeito Stroop</h1>
-            <p>Prepare-se para testar sua agilidade mental!</p>
+        <div id="start-screen" class="screen active">
+            <h1>Bem-vindo ao Teste Stroop!</h1>
+            <p>Prepare-se para testar sua agilidade mental.</p>
             <input type="text" id="player-name-input" placeholder="Digite seu nome" required>
             <button id="start-button">Começar</button>
+            <div id="lobby-info" style="margin-top: 20px; font-size: 0.9em; color: #555;">
+                <p>Aguardando outros jogadores... Início em <span id="lobby-timer">60</span>s</p>
+                <ul id="players-in-lobby">
+                    </ul>
+            </div>
         </div>
 
-        <div id="game-screen">
+        <div id="game-screen" class="screen">
             <div id="game-info">
-                <div id="timer">Tempo: 60s</div>
-                <div id="score">Acertos: 0</div>
+                <div id="timer">Tempo: 0s</div> <div id="score">Acertos: 0</div>
             </div>
-            <div id="challenge-text"></div>
+            <div id="challenge-text">
+                </div>
             <div id="controls">
                 <button class="color-button" id="btn-blue" data-color="blue">AZUL</button>
                 <button class="color-button" id="btn-green" data-color="green">VERDE</button>
@@ -165,141 +34,16 @@
             </div>
         </div>
 
-        <div id="results-screen">
-            <h2>Resultados</h2>
-            <p id="final-score"></p>
-            <h3>Ranking (Local)</h3>
-            <ol id="ranking-list"></ol>
-            <button id="restart-button" class="color-button" style="background-color: #007bff; margin-top: 30px;">Jogar Novamente</button>
+        <div id="results-screen" class="screen">
+            <h2>Resultados do Jogo</h2>
+            <p id="final-score">Sua pontuação: N/A</p>
+            <h3>Ranking Geral</h3>
+            <ol id="ranking-list">
+                <li>Carregando ranking...</li>
+            </ol>
+            <button id="restart-button">Jogar Novamente</button>
         </div>
     </div>
 
-    <script>
-        const startScreen = document.getElementById('start-screen');
-        const gameScreen = document.getElementById('game-screen');
-        const resultsScreen = document.getElementById('results-screen');
-        const playerNameInput = document.getElementById('player-name-input');
-        const startButton = document.getElementById('start-button');
-        const challengeText = document.getElementById('challenge-text');
-        const timerDisplay = document.getElementById('timer');
-        const scoreDisplay = document.getElementById('score');
-        const colorButtons = document.querySelectorAll('.color-button');
-        const finalScoreDisplay = document.getElementById('final-score');
-        const rankingList = document.getElementById('ranking-list');
-        const restartButton = document.getElementById('restart-button');
-
-        let playerName = '';
-        let score = 0;
-        let timeLeft = 60; // 1 minuto de jogo
-        let gameInterval;
-        let currentChallenge = {};
-        let localRanking = JSON.parse(localStorage.getItem('stroopRanking')) || [];
-
-        // Definição dos desafios Stroop
-        const challenges = [
-            { text: 'AMARELO', color: 'yellow', correctColor: 'yellow' },
-            { text: '青', color: 'blue', correctColor: 'blue' }, // "Azul" em japonês
-            { text: 'VERMELHO', color: 'green', correctColor: 'green' },
-            { text: 'AMARELO', color: 'red', correctColor: 'red' },
-            { text: 'AZUL', color: 'green', correctColor: 'green', fontSize: '0.8em' } // Fonte menor
-        ];
-
-        // --- Funções do Jogo ---
-
-        function showScreen(screen) {
-            startScreen.classList.remove('active');
-            gameScreen.classList.remove('active');
-            resultsScreen.classList.remove('active');
-            screen.classList.add('active');
-        }
-
-        function startGame() {
-            playerName = playerNameInput.value.trim();
-            if (!playerName) {
-                alert('Por favor, digite seu nome para começar!');
-                return;
-            }
-
-            score = 0;
-            timeLeft = 60;
-            scoreDisplay.textContent = `Acertos: ${score}`;
-            timerDisplay.textContent = `Tempo: ${timeLeft}s`;
-            showScreen(gameScreen);
-            generateChallenge();
-            gameInterval = setInterval(updateTimer, 1000);
-        }
-
-        function updateTimer() {
-            timeLeft--;
-            timerDisplay.textContent = `Tempo: ${timeLeft}s`;
-            if (timeLeft <= 0) {
-                endGame();
-            }
-        }
-
-        function generateChallenge() {
-            const randomIndex = Math.floor(Math.random() * challenges.length);
-            currentChallenge = challenges[randomIndex];
-
-            challengeText.innerHTML = `<span style="color: ${currentChallenge.color}; font-size: ${currentChallenge.fontSize || 'inherit'};">${currentChallenge.text}</span>`;
-        }
-
-        function handleButtonClick(event) {
-            const clickedColor = event.target.dataset.color;
-            if (clickedColor === currentChallenge.correctColor) {
-                score++;
-                scoreDisplay.textContent = `Acertos: ${score}`;
-                generateChallenge(); // Gera um novo desafio após acerto
-            } else {
-                // Opcional: penalidade por erro, ou apenas não contabiliza
-                // console.log("Errou!");
-            }
-        }
-
-        function endGame() {
-            clearInterval(gameInterval);
-            finalScoreDisplay.textContent = `Parabéns, ${playerName}! Você fez ${score} acertos.`;
-            saveRanking(playerName, score);
-            displayRanking();
-            showScreen(resultsScreen);
-        }
-
-        function saveRanking(name, finalScore) {
-            localRanking.push({ name: name, score: finalScore, time: 60 - timeLeft }); // Tempo é menos relevante aqui já que o jogo tem tempo fixo
-            localRanking.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score; // Mais acertos primeiro
-                }
-                // Se acertos iguais, menor tempo vence (na verdade, quem "sobrou" mais tempo, mas para um jogo de 60s, é o mesmo)
-                return a.time - b.time;
-            });
-            // Limitar ranking para os top 10, por exemplo
-            localRanking = localRanking.slice(0, 10);
-            localStorage.setItem('stroopRanking', JSON.stringify(localRanking));
-        }
-
-        function displayRanking() {
-            rankingList.innerHTML = ''; // Limpa a lista anterior
-            localRanking.forEach((player, index) => {
-                const li = document.createElement('li');
-                li.textContent = `${index + 1}. ${player.name}: ${player.score} acertos`;
-                rankingList.appendChild(li);
-            });
-        }
-
-        // --- Event Listeners ---
-        startButton.addEventListener('click', startGame);
-        restartButton.addEventListener('click', () => {
-            playerNameInput.value = ''; // Limpa o nome para uma nova partida
-            showScreen(startScreen);
-        });
-
-        colorButtons.forEach(button => {
-            button.addEventListener('click', handleButtonClick);
-        });
-
-        // Inicializa o ranking ao carregar a página
-        displayRanking();
-    </script>
-</body>
+    </body>
 </html>
