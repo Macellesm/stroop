@@ -1,6 +1,6 @@
-// script.js
+// script.js (Frontend atualizado)
 
-// --- Seleção de Elementos HTML ---
+// --- Seleção de Elementos HTML (permanece igual) ---
 const startScreen = document.getElementById('start-screen');
 const gameScreen = document.getElementById('game-screen');
 const resultsScreen = document.getElementById('results-screen');
@@ -13,208 +13,156 @@ const lobbyTimerDisplay = document.getElementById('lobby-timer');
 const playersInLobbyList = document.getElementById('players-in-lobby');
 
 const challengeText = document.getElementById('challenge-text');
-const timerDisplay = document.getElementById('timer');
+const timerDisplay = document.getElementById('timer'); // Será o timer da questão, ou tempo total de jogo
 const scoreDisplay = document.getElementById('score');
-const colorButtons = document.querySelectorAll('.color-button'); // Seleciona todos os botões de cor
+const colorButtons = document.querySelectorAll('.color-button');
 
 const finalScoreDisplay = document.getElementById('final-score');
 const rankingList = document.getElementById('ranking-list');
 
-// --- Variáveis de Estado do Jogo ---
+// --- Variáveis de Estado do Jogo (Ajustadas para Backend) ---
 let playerName = '';
-let score = 0;
-let gameTimeLeft = 60; // Tempo total de jogo em segundos
-let lobbyTimeLeft = 60; // Tempo para o lobby em segundos (1 minuto)
-let gameInterval; // Para o temporizador do jogo
-let lobbyInterval; // Para o temporizador do lobby
-let currentChallenge = {}; // Armazena o desafio atual
-let localRanking = JSON.parse(localStorage.getItem('stroopRanking')) || []; // Carrega ranking do armazenamento local
+let score = 0; // Sua pontuação local
+let totalTime = 0; // Seu tempo total de resposta
+let currentChallenge = {}; // Desafio atual enviado pelo backend
+let responseStartTime; // Tempo em que o desafio apareceu (para calcular tempo de resposta)
 
-// Definição dos desafios Stroop
-// Cada objeto tem:
-//   - text: O texto que será exibido.
-//   - displayColor: A cor com que o 'text' será renderizado.
-//   - correctColor: A cor que o jogador DEVE clicar.
-//   - fontSize: (Opcional) Ajuste de tamanho da fonte para desafios específicos.
-const challenges = [
-    { text: 'AMARELO', displayColor: 'yellow', correctColor: 'yellow' },
-    { text: '青', displayColor: 'blue', correctColor: 'blue' }, // "Azul" em japonês
-    { text: 'VERMELHO', displayColor: 'green', correctColor: 'green' },
-    { text: 'AMARELO', displayColor: 'red', correctColor: 'red' },
-    { text: 'AZUL', displayColor: 'green', correctColor: 'green', fontSize: '0.8em' } // Fonte menor
-];
+// Socket.IO Connection
+const socket = io(); // Conecta ao servidor Socket.IO
 
-// --- Funções de Controle de Tela ---
-/**
- * Alterna a visibilidade das telas do jogo.
- * @param {HTMLElement} screenToShow - O elemento da tela que deve ser exibido.
- */
+// --- Funções de Controle de Tela (permanece igual) ---
 function showScreen(screenToShow) {
-    // Remove 'active' de todas as telas
     startScreen.classList.remove('active');
     gameScreen.classList.remove('active');
     resultsScreen.classList.remove('active');
-    // Adiciona 'active' à tela desejada
     screenToShow.classList.add('active');
 }
 
-// --- Funções do Jogo ---
+// --- Funções para Interação com o Backend ---
 
 /**
- * Inicia a contagem regressiva do lobby e prepara o jogo.
+ * Envia o nome do jogador para o servidor para entrar no jogo.
  */
-function startLobbyTimer() {
-    lobbyTimeLeft = 60; // Reseta o tempo do lobby
-    lobbyTimerDisplay.textContent = lobbyTimeLeft;
-    playersInLobbyList.innerHTML = `<li>${playerName} (Você)</li>`; // Adiciona o próprio jogador
-
-    // Este seria o ponto onde um backend real adicionaria outros jogadores
-    // Por exemplo, em um cenário real com WebSockets, o servidor enviaria a lista de jogadores
-
-    lobbyInterval = setInterval(() => {
-        lobbyTimeLeft--;
-        lobbyTimerDisplay.textContent = lobbyTimeLeft;
-
-        if (lobbyTimeLeft <= 0) {
-            clearInterval(lobbyInterval);
-            startGame(); // Inicia o jogo para todos (neste caso, apenas o jogador local)
-        }
-    }, 1000);
-}
-
-/**
- * Inicia o jogo principal após o lobby.
- */
-function startGame() {
-    score = 0;
-    gameTimeLeft = 60; // Reseta o tempo de jogo
-    scoreDisplay.textContent = `Acertos: ${score}`;
-    timerDisplay.textContent = `Tempo: ${gameTimeLeft}s`;
-    showScreen(gameScreen); // Mostra a tela do jogo
-    generateChallenge(); // Gera o primeiro desafio
-
-    gameInterval = setInterval(updateGameTimer, 1000); // Inicia o temporizador do jogo
-}
-
-/**
- * Atualiza o temporizador do jogo e verifica o fim do tempo.
- */
-function updateGameTimer() {
-    gameTimeLeft--;
-    timerDisplay.textContent = `Tempo: ${gameTimeLeft}s`;
-
-    if (gameTimeLeft <= 0) {
-        endGame(); // Finaliza o jogo quando o tempo acaba
-    }
-}
-
-/**
- * Gera e exibe um novo desafio Stroop na tela.
- */
-function generateChallenge() {
-    // Escolhe um desafio aleatoriamente da lista
-    const randomIndex = Math.floor(Math.random() * challenges.length);
-    currentChallenge = challenges[randomIndex];
-
-    // Cria o HTML para exibir o texto com a cor e o tamanho de fonte corretos
-    challengeText.innerHTML = `<span style="color: ${currentChallenge.displayColor}; font-size: ${currentChallenge.fontSize || 'inherit'};">${currentChallenge.text}</span>`;
-}
-
-/**
- * Lida com o clique do jogador em um dos botões de cor.
- * @param {Event} event - O evento de clique do botão.
- */
-function handleButtonClick(event) {
-    const clickedColor = event.target.dataset.color; // Pega a cor do atributo 'data-color' do botão
-
-    if (clickedColor === currentChallenge.correctColor) {
-        score++; // Incrementa a pontuação se acertar
-        scoreDisplay.textContent = `Acertos: ${score}`;
-        generateChallenge(); // Gera um novo desafio
-    } else {
-        // Opcional: Aqui você poderia adicionar lógica para penalidade por erro,
-        // mas no efeito Stroop, geralmente, apenas a não contagem do acerto já é a penalidade.
-        // console.log("Errou!");
-    }
-}
-
-/**
- * Finaliza o jogo, exibe os resultados e atualiza o ranking.
- */
-function endGame() {
-    clearInterval(gameInterval); // Para o temporizador do jogo
-    finalScoreDisplay.textContent = `Parabéns, ${playerName}! Você fez ${score} acertos.`;
-
-    saveRanking(playerName, score); // Salva a pontuação no ranking
-    displayRanking(); // Exibe o ranking atualizado
-
-    showScreen(resultsScreen); // Mostra a tela de resultados
-}
-
-/**
- * Salva a pontuação do jogador no ranking local (localStorage).
- * @param {string} name - Nome do jogador.
- * @param {number} finalScore - Pontuação final do jogador.
- */
-function saveRanking(name, finalScore) {
-    localRanking.push({ name: name, score: finalScore }); // Adiciona o novo resultado
-    
-    // Classifica o ranking: primeiro por maior pontuação, depois por tempo (nesse caso, como o tempo é fixo, só a pontuação importa mais)
-    localRanking.sort((a, b) => b.score - a.score);
-
-    // Limita o ranking aos top 10 (ou outro número, se desejar)
-    localRanking = localRanking.slice(0, 10);
-
-    // Salva o ranking atualizado no localStorage do navegador
-    localStorage.setItem('stroopRanking', JSON.stringify(localRanking));
-}
-
-/**
- * Exibe o ranking atual na tela de resultados.
- */
-function displayRanking() {
-    rankingList.innerHTML = ''; // Limpa a lista existente
-
-    if (localRanking.length === 0) {
-        rankingList.innerHTML = '<li>Nenhum resultado ainda. Jogue para aparecer aqui!</li>';
-        return;
-    }
-
-    localRanking.forEach((player, index) => {
-        const li = document.createElement('li');
-        li.textContent = `${index + 1}. ${player.name}: ${player.score} acertos`;
-        rankingList.appendChild(li);
-    });
-}
-
-// --- Event Listeners (Ouvintes de Eventos) ---
-
-// Ao clicar no botão "Começar" na tela inicial
-startButton.addEventListener('click', () => {
-    playerName = playerNameInput.value.trim(); // Pega o nome digitado
+function joinGame() {
+    playerName = playerNameInput.value.trim();
     if (!playerName) {
         alert('Por favor, digite seu nome para começar!');
         return;
     }
-    // Mostra a tela de início do lobby e inicia o temporizador
-    showScreen(startScreen); // Mantém na tela de início para mostrar o timer do lobby
-    startLobbyTimer();
+    socket.emit('joinGame', playerName);
+    // showScreen(startScreen); // Permanece na tela de início para ver o lobby
+}
+
+/**
+ * Lida com o clique do jogador em um dos botões de cor e envia a resposta para o servidor.
+ * @param {Event} event - O evento de clique do botão.
+ */
+function handleButtonClick(event) {
+    const clickedColor = event.target.dataset.color;
+    if (currentChallenge.correctColor) { // Certifica-se de que há um desafio ativo
+        const responseTime = Date.now() - responseStartTime;
+        socket.emit('submitAnswer', clickedColor); // Envia apenas a cor para o backend
+        // O backend lidará com a lógica de acerto/erro e pontuação
+        // totalTime += responseTime; // O backend vai gerenciar o totalTime
+        // score++; // O backend vai gerenciar o score
+    }
+}
+
+// --- Eventos de Conexão e Recebimento do Servidor ---
+
+socket.on('connect', () => {
+    console.log('Conectado ao servidor Socket.IO:', socket.id);
 });
 
-// Ao clicar em qualquer botão de cor durante o jogo
+socket.on('disconnect', () => {
+    console.log('Desconectado do servidor Socket.IO');
+});
+
+// Recebe o estado do lobby do servidor
+socket.on('lobbyState', (data) => {
+    showScreen(startScreen); // Garante que a tela de início esteja visível
+    lobbyTimerDisplay.textContent = data.timer;
+    playersInLobbyList.innerHTML = ''; // Limpa a lista
+    data.players.forEach(player => {
+        const li = document.createElement('li');
+        li.textContent = player;
+        playersInLobbyList.appendChild(li);
+    });
+    console.log('Lobby State:', data);
+});
+
+// Notificação de que o jogo já começou (se tentar entrar tarde)
+socket.on('gameAlreadyStarted', (message) => {
+    alert(message);
+    playerNameInput.value = ''; // Limpa o campo de nome
+    showScreen(startScreen); // Volta para a tela inicial
+});
+
+
+// Quando o servidor sinaliza o início do jogo
+socket.on('gameStart', () => {
+    console.log('Jogo começou!');
+    showScreen(gameScreen);
+    score = 0; // Zera score localmente para o novo jogo
+    totalTime = 0; // Zera tempo localmente
+    scoreDisplay.textContent = `Acertos: ${score}`;
+    timerDisplay.textContent = `Tempo: ${gameTimeLeft}s`; // Reinicializa o timer na tela do jogo
+    // O timer da questão ou o timer geral do jogo será enviado pelo backend.
+});
+
+// Quando o servidor envia um novo desafio
+socket.on('newChallenge', (challengeData) => {
+    currentChallenge = challengeData; // Armazena o desafio
+    responseStartTime = Date.now(); // Marca o início do tempo de resposta
+    
+    // Atualiza o texto e a cor do desafio
+    challengeText.innerHTML = `<span style="color: ${challengeData.displayColor}; font-size: ${challengeData.fontSize || 'inherit'};">${challengeData.text}</span>`;
+    
+    console.log('Novo desafio:', challengeData);
+});
+
+// Recebe o resultado da sua resposta do servidor
+socket.on('answerResult', (data) => {
+    // Atualiza a pontuação local do jogador com a pontuação validada pelo servidor
+    score = data.score;
+    scoreDisplay.textContent = `Acertos: ${score}`;
+    // O tempo de resposta individual não será exibido em tempo real, mas o score sim.
+    if (!data.correct) {
+        console.log("Você errou! Sua pontuação não mudou.");
+    }
+});
+
+// Quando o jogo termina
+socket.on('gameEnd', (data) => {
+    console.log('Jogo terminou! Ranking:', data.ranking);
+    finalScoreDisplay.textContent = `Parabéns, ${playerName}! Sua pontuação final: ${score} acertos.`;
+    
+    // Exibe o ranking global
+    rankingList.innerHTML = '';
+    if (data.ranking.length === 0) {
+        rankingList.innerHTML = '<li>Nenhum resultado.</li>';
+    } else {
+        data.ranking.forEach((player, index) => {
+            const li = document.createElement('li');
+            // Formata o tempo total para segundos e milissegundos
+            const totalSeconds = (player.totalTime / 1000).toFixed(2);
+            li.textContent = `${index + 1}. ${player.name}: ${player.score} acertos (${totalSeconds}s)`;
+            rankingList.appendChild(li);
+        });
+    }
+    showScreen(resultsScreen);
+});
+
+// --- Event Listeners (Ajustados) ---
+startButton.addEventListener('click', joinGame); // Agora chama joinGame
+restartButton.addEventListener('click', () => {
+    playerNameInput.value = ''; // Limpa o nome para uma nova partida
+    socket.emit('joinGame', playerName); // Tenta entrar novamente no lobby
+});
+
 colorButtons.forEach(button => {
     button.addEventListener('click', handleButtonClick);
 });
 
-// Ao clicar no botão "Jogar Novamente" na tela de resultados
-restartButton.addEventListener('click', () => {
-    playerNameInput.value = ''; // Limpa o campo de nome
-    showScreen(startScreen); // Volta para a tela inicial
-    clearInterval(lobbyInterval); // Garante que o timer do lobby não esteja rodando
-    lobbyTimerDisplay.textContent = 60; // Reseta a exibição do timer do lobby
-    playersInLobbyList.innerHTML = ''; // Limpa a lista de jogadores no lobby
-});
-
 // --- Inicialização ---
-// Exibe o ranking quando a página é carregada pela primeira vez
-displayRanking();
+showScreen(startScreen); // Inicia na tela de início
