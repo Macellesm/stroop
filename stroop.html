@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Stroop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        .timer {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .instructions {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+        }
+        
+        .color-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        
+        .color-option {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .color-option:active {
+            transform: scale(0.95);
+        }
+        
+        .stroop-item {
+            font-size: 24px;
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .small-font {
+            font-size: 12px;
+        }
+        
+        .japanese {
+            font-family: 'MS Gothic', sans-serif;
+        }
+        
+        .start-btn, .next-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .start-btn:hover, .next-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .results {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        
+        .blue { color: blue; }
+        .green { color: green; }
+        .red { color: red; }
+        .yellow { color: yellow; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="intro-screen">
+            <h1>Teste do Efeito Stroop</h1>
+            <p>Selecione a COR da palavra, não o que está escrito.</p>
+            <button class="start-btn" onclick="startTest()">Começar</button>
+        </div>
+        
+        <div id="test-screen" style="display: none;">
+            <div class="timer" id="timer">0.00s</div>
+            <div class="stroop-item" id="stroop-item"></div>
+            <div class="color-options">
+                <div class="color-option blue" onclick="checkAnswer('blue')">Azul</div>
+                <div class="color-option green" onclick="checkAnswer('green')">Verde</div>
+                <div class="color-option red" onclick="checkAnswer('red')">Vermelho</div>
+                <div class="color-option yellow" style="color: #ffcc00;" onclick="checkAnswer('yellow')">Amarelo</div>
+            </div>
+        </div>
+        
+        <div id="results-screen" style="display: none;">
+            <h2>Resultados</h2>
+            <div id="results" class="results"></div>
+            <button class="next-btn" onclick="nextTest()">Próximo</button>
+        </div>
+        
+        <div id="final-screen" style="display: none;">
+            <h2>Teste Concluído!</h2>
+            <div id="final-results"></div>
+            <button class="start-btn" onclick="location.reload()">Recomeçar</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuração dos testes
+        const tests = [
+            { text: "Amarelo", color: "yellow", class: "" }, // Amarelo em Amarelo
+            { text: "青", color: "blue", class: "japanese" }, // Azul em japonês
+            { text: "Verde", color: "red", class: "" }, // Cor verde em nome vermelho
+            { text: "Vermelho", color: "yellow", class: "" }, // Vermelho em amarelo
+            { text: "Azul", color: "green", class: "small-font" } // Fonte pequena em verde, escrito azul
+        ];
+        
+        let currentTest = 0;
+        let startTime;
+        let timerInterval;
+        let results = [];
+        
+        function startTest() {
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('test-screen').style.display = 'block';
+            showTest();
+        }
+        
+        function showTest() {
+            const test = tests[currentTest];
+            const stroopItem = document.getElementById('stroop-item');
+            
+            stroopItem.textContent = test.text;
+            stroopItem.className = 'stroop-item ' + test.color + ' ' + test.class;
+            
+            startTimer();
+        }
+        
+        function startTimer() {
+            startTime = new Date().getTime();
+            clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                const currentTime = new Date().getTime();
+                const elapsedTime = (currentTime - startTime) / 1000;
+                document.getElementById('timer').textContent = elapsedTime.toFixed(2) + 's';
+            }, 10);
+        }
+        
+        function checkAnswer(selectedColor) {
+            clearInterval(timerInterval);
+            
+            const endTime = new Date().getTime();
+            const reactionTime = (endTime - startTime) / 1000;
+            const correctColor = tests[currentTest].color;
+            const isCorrect = selectedColor === correctColor;
+            
+            results.push({
+                test: currentTest + 1,
+                reactionTime: reactionTime,
+                isCorrect: isCorrect
+            });
+            
+            showResults(isCorrect, reactionTime);
+        }
+        
+        function showResults(isCorrect, time) {
+            document.getElementById('test-screen').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <p>${isCorrect ? '✅ Correto!' : '❌ Incorreto'}</p>
+                <p>Tempo de reação: ${time.toFixed(2)} segundos</p>
+                <p>Teste ${currentTest + 1} de ${tests.length}</p>
+            `;
+        }
+        
+        function nextTest() {
+            currentTest++;
+            
+            if (currentTest < tests.length) {
+                document.getElementById('results-screen').style.display = 'none';
+                document.getElementById('test-screen').style.display = 'block';
+                showTest();
+            } else {
+                showFinalResults();
+            }
+        }
+        
+        function showFinalResults() {
+            document.getElementById('results-screen').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'block';
+            
+            const totalTime = results.reduce((sum, result) => sum + result.reactionTime, 0);
+            const correctAnswers = results.filter(result => result.isCorrect).length;
+            const accuracy = (correctAnswers / tests.length) * 100;
+            
+            let resultsHTML = `
+                <p>Total de acertos: ${correctAnswers} de ${tests.length}</p>
+                <p>Precisão: ${accuracy.toFixed(1)}%</p>
+                <p>Tempo médio: ${(totalTime / tests.length).toFixed(2)}s</p>
+                <h3>Detalhes:</h3>
+            `;
+            
+            results.forEach((result, index) => {
+                resultsHTML += `
+                    <p>Teste ${index + 1}: ${result.isCorrect ? '✅' : '❌'} - ${result.reactionTime.toFixed(2)}s</p>
+                `;
+            });
+            
+            document.getElementById('final-results').innerHTML = resultsHTML;
+        }
+    </script>
+</body>
+</html>
